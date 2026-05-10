@@ -1,0 +1,76 @@
+{
+  "users": [
+    {
+      "email": "dmitry@yandex.ru",
+      "password": "qwerty12345",
+      "name": "Дмитрий",
+      "surname": "Носков",
+      "phone": "+79051112233",
+      "about": "Backend на Django, давно тяну pet-проекты в одиночку.",
+      "github_url": "https://github.com/dmitry-demo"
+    },
+    {
+      "email": "polina@example.com",
+      "password": "qwerty12345",
+      "name": "Полина",
+      "surname": "Орехова",
+      "phone": "+79052223344",
+      "about": "Дизайнер интерфейсов, ищу команду на pet-проект.",
+      "github_url": ""
+    },
+    {
+      "email": "sergey@example.com",
+      "password": "qwerty12345",
+      "name": "Сергей",
+      "surname": "Шамов",
+      "phone": "+79053334455",
+      "about": "Инженер по DevOps, нравится автоматизация.",
+      "github_url": "https://github.com/sergeysh"
+    },
+    {
+      "email": "yulia@example.com",
+      "password": "qwerty12345",
+      "name": "Юлия",
+      "surname": "Тимофеева",
+      "phone": "+79054445566",
+      "about": "Frontend-разработчик, React и Vue.",
+      "github_url": ""
+    }
+  ],
+  "projects": [
+    {
+      "owner_email": "dmitry@yandex.ru",
+      "name": "Дневник тренировок",
+      "description": "Веб-приложение для учёта тренировок и прогресса в зале.",
+      "status": "open",
+      "github_url": ""
+    },
+    {
+      "owner_email": "polina@example.com",
+      "name": "Маркетплейс цифровых иллюстраций",
+      "description": "Площадка, где художники продают свои работы напрямую.",
+      "status": "open",
+      "github_url": "https://github.com/polina-demo/illustrations"
+    },
+    {
+      "owner_email": "sergey@example.com",
+      "name": "Чат-бот для DevOps-инженеров",
+      "description": "Telegram-бот, который присылает дайджест по infra-инцидентам.",
+      "status": "open",
+      "github_url": ""
+    },
+    {
+      "owner_email": "yulia@example.com",
+      "name": "Браузерная игра-головоломка",
+      "description": "Небольшая логическая игра с уровнями, написанная на React.",
+      "status": "closed",
+      "github_url": ""
+    }
+  ],
+  "superuser": {
+    "email": "admin@example.com",
+    "password": "admin12345",
+    "name": "Admin",
+    "surname": "Root"
+  }
+}
