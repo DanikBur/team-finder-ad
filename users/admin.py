@@ -7,9 +7,8 @@ from django.contrib.auth.forms import (
 )
 from django.utils.html import format_html
 
+from .constants import ADMIN_AVATAR_THUMB_PX
 from .models import User
-
-THUMB_PX = 32
 
 
 class CreateForm(UserCreationForm):
@@ -71,5 +70,5 @@ class UserAdmin(DjangoUserAdmin):
         return format_html(
             '<img src="{}" width="{}" height="{}" '
             'style="border-radius:50%;object-fit:cover" />',
-            obj.avatar.url, THUMB_PX, THUMB_PX,
+            obj.avatar.url, ADMIN_AVATAR_THUMB_PX, ADMIN_AVATAR_THUMB_PX,
         )

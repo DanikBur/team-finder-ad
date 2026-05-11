@@ -7,10 +7,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from .constants import PROJECTS_PAGE_SIZE
 from .forms import ProjectForm
 from .models import Project
-
-PAGE_SIZE = 12
 
 
 def _with_relations(qs):
@@ -19,7 +18,19 @@ def _with_relations(qs):
 
 
 def _page(request, qs):
-    return Paginator(qs, PAGE_SIZE).get_page(request.GET.get("page"))
+    return Paginator(qs, PROJECTS_PAGE_SIZE).get_page(
+        request.GET.get("page"),
+    )
+
+
+def _ajax_get_project(pk):
+    """Возвращает проект по pk или JsonResponse 404 для AJAX-эндпоинтов."""
+    project = Project.objects.filter(pk=pk).first()
+    if project is None:
+        return None, JsonResponse(
+            {"status": "not_found"}, status=HTTPStatus.NOT_FOUND,
+        )
+    return project, None
 
 
 def project_list(request):
@@ -35,7 +46,7 @@ def project_list(request):
 @login_required
 def favorite_projects(request):
     qs = _with_relations(request.user.favorites.all()).order_by(
-        "-created_at"
+        "-created_at",
     )
     page = _page(request, qs)
     return render(
@@ -47,7 +58,7 @@ def favorite_projects(request):
 
 def project_detail(request, pk):
     project = get_object_or_404(
-        _with_relations(Project.objects.all()), pk=pk
+        _with_relations(Project.objects.all()), pk=pk,
     )
     return render(
         request,
@@ -91,10 +102,12 @@ def edit_project(request, pk):
 @login_required
 @require_POST
 def complete_project(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project, missing = _ajax_get_project(pk)
+    if missing is not None:
+        return missing
     if project.owner_id != request.user.id:
         return JsonResponse(
-            {"status": "forbidden"}, status=HTTPStatus.FORBIDDEN
+            {"status": "forbidden"}, status=HTTPStatus.FORBIDDEN,
         )
     if project.status != Project.OPEN:
         return JsonResponse(
@@ -104,14 +117,16 @@ def complete_project(request, pk):
     project.status = Project.CLOSED
     project.save(update_fields=["status"])
     return JsonResponse(
-        {"status": "ok", "project_status": Project.CLOSED}
+        {"status": "ok", "project_status": Project.CLOSED},
     )
 
 
 @login_required
 @require_POST
 def toggle_participate(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project, missing = _ajax_get_project(pk)
+    if missing is not None:
+        return missing
     if project.participants.filter(pk=request.user.pk).exists():
         project.participants.remove(request.user)
         return JsonResponse({"status": "ok", "participant": False})
@@ -122,7 +137,9 @@ def toggle_participate(request, pk):
 @login_required
 @require_POST
 def toggle_favorite(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project, missing = _ajax_get_project(pk)
+    if missing is not None:
+        return missing
     if request.user.favorites.filter(pk=project.pk).exists():
         request.user.favorites.remove(project)
         return JsonResponse({"status": "ok", "favorited": False})

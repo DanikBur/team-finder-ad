@@ -2,41 +2,33 @@
 import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.core.validators import RegexValidator
 from django.db import models
 
 from . import avatar
+from .constants import (
+    ABOUT_MAX_LENGTH,
+    EMAIL_MAX_LENGTH,
+    NAME_MAX_LENGTH,
+    PHONE_MAX_LENGTH,
+    SURNAME_MAX_LENGTH,
+)
 from .managers import UserManager
-
-
-def to_e164(phone):
-    """Приводит 8XXXXXXXXXX к +7XXXXXXXXXX."""
-    if phone and phone.startswith("8") and len(phone) == 11:
-        return "+7" + phone[1:]
-    return phone
-
-
-phone_validator = RegexValidator(
-    regex=r"^(\+7|8)\d{10}$",
-    message="Телефон в формате 8XXXXXXXXXX или +7XXXXXXXXXX",
-)
-github_validator = RegexValidator(
-    regex=r"^https?://(www\.)?github\.com/.+",
-    message="Ссылка должна вести на github.com",
-)
+from .utils import github_validator, phone_validator, to_e164
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField("Email", unique=True)
-    name = models.CharField("Имя", max_length=124)
-    surname = models.CharField("Фамилия", max_length=124)
+    email = models.EmailField(
+        "Email", unique=True, max_length=EMAIL_MAX_LENGTH,
+    )
+    name = models.CharField("Имя", max_length=NAME_MAX_LENGTH)
+    surname = models.CharField("Фамилия", max_length=SURNAME_MAX_LENGTH)
     about = models.TextField(
-        "О себе", max_length=256, blank=True, default="",
+        "О себе", max_length=ABOUT_MAX_LENGTH, blank=True, default="",
     )
     avatar = models.ImageField("Аватар", upload_to="avatars/")
     phone = models.CharField(
         "Телефон",
-        max_length=12,
+        max_length=PHONE_MAX_LENGTH,
         unique=True,
         validators=[phone_validator],
         blank=True,

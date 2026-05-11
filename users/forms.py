@@ -2,12 +2,18 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm
 
-from .models import User, to_e164
+from .constants import (
+    NAME_MAX_LENGTH,
+    PROFILE_ABOUT_ROWS,
+    SURNAME_MAX_LENGTH,
+)
+from .models import User
+from .utils import to_e164
 
 
 class SignUpForm(forms.ModelForm):
-    name = forms.CharField(label="Имя", max_length=124)
-    surname = forms.CharField(label="Фамилия", max_length=124)
+    name = forms.CharField(label="Имя", max_length=NAME_MAX_LENGTH)
+    surname = forms.CharField(label="Фамилия", max_length=SURNAME_MAX_LENGTH)
     email = forms.EmailField(label="Email")
     password = forms.CharField(label="Пароль", widget=forms.PasswordInput)
 
@@ -66,7 +72,9 @@ class ProfileForm(forms.ModelForm):
             "phone": "Телефон",
             "github_url": "Ссылка на Github",
         }
-        widgets = {"about": forms.Textarea(attrs={"rows": 3})}
+        widgets = {
+            "about": forms.Textarea(attrs={"rows": PROFILE_ABOUT_ROWS}),
+        }
 
     def clean_phone(self):
         phone = self.cleaned_data.get("phone") or ""

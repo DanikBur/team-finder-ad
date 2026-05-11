@@ -2,7 +2,9 @@ from django.conf import settings
 from django.db import models
 from django.urls import reverse
 
-from users.models import github_validator
+from users.utils import github_validator
+
+from .constants import NAME_MAX_LENGTH
 
 
 class Project(models.Model):
@@ -17,7 +19,7 @@ class Project(models.Model):
     CLOSED = Status.CLOSED
     STATUSES = Status.choices
 
-    name = models.CharField("Название", max_length=200)
+    name = models.CharField("Название", max_length=NAME_MAX_LENGTH)
     description = models.TextField("Описание", blank=True, default="")
     github_url = models.URLField(
         "GitHub",

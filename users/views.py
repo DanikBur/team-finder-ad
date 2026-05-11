@@ -4,10 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .constants import USERS_PAGE_SIZE
 from .forms import PasswordForm, ProfileForm, SignInForm, SignUpForm
 from .models import User
-
-PAGE_SIZE = 12
 
 
 def _filtered_users(queryset, filter_key, me):
@@ -70,7 +69,7 @@ def participants(request):
     chosen = request.GET.get("filter") or ""
     if chosen and request.user.is_authenticated:
         queryset = _filtered_users(queryset, chosen, request.user)
-    page = Paginator(queryset, PAGE_SIZE).get_page(
+    page = Paginator(queryset, USERS_PAGE_SIZE).get_page(
         request.GET.get("page"),
     )
     return render(
