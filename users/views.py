@@ -9,30 +9,35 @@ from .models import User
 
 PAGE_SIZE = 12
 
-# Фильтры списка пользователей. Ключ — значение GET-параметра "filter",
-# значение — функция, возвращающая queryset из User.objects.all().
-FILTERS = {
-    "owners-of-favorite-projects": (
-        lambda qs, me: qs.filter(
-            owned_projects__in=me.favorites.all()
-        ).distinct()
-    ),
-    "owners-of-participating-projects": (
-        lambda qs, me: qs.filter(
-            owned_projects__in=me.participated_projects.all()
-        ).distinct()
-    ),
-    "interested-in-my-projects": (
-        lambda qs, me: qs.filter(
-            favorites__in=me.owned_projects.all()
-        ).distinct()
-    ),
-    "participants-of-my-projects": (
-        lambda qs, me: qs.filter(
-            participated_projects__in=me.owned_projects.all()
-        ).exclude(pk=me.pk).distinct()
-    ),
-}
+
+def _filtered_users(queryset, filter_key, me):
+    """Применяет к queryset фильтр по выбранному критерию.
+
+    Возвращает исходный queryset, если ключ не распознан.
+    """
+    match filter_key:
+        case "owners-of-favorite-projects":
+            return queryset.filter(
+                owned_projects__in=me.favorites.all(),
+            ).distinct()
+        case "owners-of-participating-projects":
+            return queryset.filter(
+                owned_projects__in=me.participated_projects.all(),
+            ).distinct()
+        case "interested-in-my-projects":
+            return queryset.filter(
+                favorites__in=me.owned_projects.all(),
+            ).distinct()
+        case "participants-of-my-projects":
+            return (
+                queryset.filter(
+                    participated_projects__in=me.owned_projects.all(),
+                )
+                .exclude(pk=me.pk)
+                .distinct()
+            )
+        case _:
+            return queryset
 
 
 def signup(request):
@@ -61,11 +66,13 @@ def signout(request):
 
 
 def participants(request):
-    qs = User.objects.all()
+    queryset = User.objects.all()
     chosen = request.GET.get("filter") or ""
-    if chosen and request.user.is_authenticated and chosen in FILTERS:
-        qs = FILTERS[chosen](qs, request.user)
-    page = Paginator(qs, PAGE_SIZE).get_page(request.GET.get("page"))
+    if chosen and request.user.is_authenticated:
+        queryset = _filtered_users(queryset, chosen, request.user)
+    page = Paginator(queryset, PAGE_SIZE).get_page(
+        request.GET.get("page"),
+    )
     return render(
         request,
         "users/participants.html",
